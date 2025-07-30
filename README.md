@@ -6,19 +6,9 @@
 
 **系統需求**: Docker Engine 18.06.0+, Docker Compose 2.0.0+, 4GB+ RAM
 
-**參考文檔**: [docker-elk-src/README.md](./docker-elk-src/README.md)
+**docker-elk官方參考文檔**: [docker-elk-src/README.md](./docker-elk-src/README.md)
 
-```bash
-# 啟動
-./start-elk-otel.sh
-
-# 停止
-./stop-elk-otel.sh
-```
-
-## 配置
-
-**必須修改預設密碼 `changeme`**
+### 環境變數設定
 
 ```bash
 # 1. 設定 ELK Stack 環境變數
@@ -29,6 +19,20 @@ cp docker-elk-src/.env.example docker-elk-src/.env
 cp opentelemetry-collector/.env.example opentelemetry-collector/.env
 # 編輯 opentelemetry-collector/.env 當中的版本
 ```
+
+### 啟動 docker containers
+```bash
+# 啟動
+# 順序啟動: 檢查.env → 檢核 ElasticSearch 或 OTEL Collector 版本 → ElasticSearch 初始化 → ELK Stask: Fleet + APM + LogStash up → OTEL Collector up
+./start-elk-otel.sh
+
+
+# 停止
+# OTEL Collector down -> ELK Stacks down
+./stop-elk-otel.sh
+```
+
+
 
 ## 服務端點
 
@@ -43,17 +47,6 @@ cp opentelemetry-collector/.env.example opentelemetry-collector/.env
 | OpenTelemetry HTTP | http://localhost:4318 |
 
 **登入**: 開啟Kibana，使用 .env 當中寫入的密碼
-
-## 腳本功能
-
-- 版本驗證 (自動使用 `latest`)
-- 順序啟動: .env → 版本驗證 → ES 初始化 → ELK Stack + Fleet + APM → OpenTelemetry
-
-**檢查服務狀態**:
-```bash
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "(elastic|kibana|logstash|fleet|apm|otel)"
-curl http://localhost:9200/_cluster/health?pretty
-```
 
 ## 疑難排解
 - **Elastic License試用過期**: `docker volume ls` 找出 elasticsearch對應的volume，刪除後重新啟動。
